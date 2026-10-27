@@ -3,417 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Internship Opportunities Directory</title>
+    <title>Morocco Tech & Consulting Internship Directory</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            background-color: #f8fafc;
-            color: #0f172a;
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 350px;
-            max-height: 400px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 400px;
-            }
-        }
-        .modal {
-            transition: opacity 0.25s ease;
-        }
-        body.modal-active {
-            overflow-x: hidden;
-            overflow-y: hidden;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; height: 250px; max-height: 300px; }
+        /* Custom Scrollbar for the table */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .status-badge { transition: all 0.2s ease; cursor: pointer; }
+        .status-badge:hover { filter: brightness(0.95); transform: scale(1.05); }
     </style>
 </head>
-<body class="antialiased min-h-screen">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Chosen Palette: Slate Backgrounds, Blue Accents, and Warm Neutral Cards -->
-    <!-- Application Structure Plan: The application uses a single-page dashboard architecture. It starts with an overview section featuring a dynamic chart to show the distribution of industries among the applied companies. Below the dashboard, a comprehensive, filterable, and searchable grid of company cards is presented. This structure allows users (classmates) to first understand the landscape of opportunities, then drill down into specific companies or sectors of interest without navigating away from the page. A modal interface is used for contact details to maintain a clean top-level grid while providing deep information on demand. -->
-    <!-- Visualization & Content Choices: The core report data is a list of ~130 companies. Goal: Organize and Compare. Presentation: A Doughnut chart (Chart.js) provides an immediate visual summary of the sectors targeted, helping classmates identify which fields have the most opportunities. A search and filter system allows rapid data retrieval. Interactive company cards organize the text data logically. Library: Chart.js (Canvas). HTML/CSS for UI components. Justification: Doughnut charts are excellent for part-to-whole relationships (industry distribution). Grid layouts are optimal for scannable directory data. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!-- Chosen Palette: Slate and Indigo (Professional, Academic, Trustworthy). Backgrounds in Slate-50, Accents in Indigo-600. Text in Slate-800. -->
+<!-- Application Structure Plan: The SPA is structured as a "Personal CRM Dashboard" for students. It includes a top-level summary dashboard (Stats & Chart) to motivate users by showing their tracking progress and data completeness. The main interactive component is a robust, searchable, and filterable data grid. This allows users to easily process the massive list of 130+ companies, copy contact info, and update application statuses that persist via localStorage, actively aiding their internship hunt. -->
+<!-- Visualization & Content Choices: 
+  - Data: List of companies -> Goal: Organize & Track -> Viz: Interactive Data Table -> Interaction: Sort, Search, Filter, Status Toggle -> Justification: Tables are the most efficient way to scan structured directory data. LocalStorage integration makes it a functional tool. 
+  - Data: Overall Database status -> Goal: Inform & Motivate -> Viz: Donut Chart (Chart.js) -> Interaction: Hover tooltips -> Justification: Gives users a quick visual cue on how many companies have known contact info versus missing data, encouraging them to fill in the blanks.
+  - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All icons are unicode.
+-->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
-    <nav class="bg-blue-900 text-white shadow-lg sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-2">🎓</span>
-                    <span class="font-bold text-xl tracking-tight">Internship Directory 2026</span>
-                </div>
-            </div>
+<header class="bg-indigo-700 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <span class="text-3xl">&#127891;</span> Morocco Internship Tracker
+            </h1>
+            <p class="text-indigo-200 text-sm mt-1">Directory of Tech, Consulting & Agency targets.</p>
         </div>
-    </nav>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <section class="mb-12 bg-white rounded-xl shadow-sm p-8 border border-slate-200">
-            <h1 class="text-3xl font-extrabold text-slate-900 mb-4">Application & Outreach Database</h1>
-            <p class="text-slate-600 text-lg leading-relaxed mb-6">
-                This directory contains a curated list of over 120 companies recently targeted for internship applications, heavily featuring IT, Consulting, and Engineering firms operating in Morocco and internationally. Use the dashboard below to explore the sectors, and search the directory to find corporate websites, LinkedIn pages, and standard HR contact points to aid your own internship search.
-            </p>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mt-8">
-                <div class="flex flex-col">
-                    <h2 class="text-xl font-bold text-slate-800 mb-2">Industry Distribution</h2>
-                    <p class="text-sm text-slate-500 mb-4">A breakdown of the companies by their primary operating sector.</p>
-                    <div class="chart-container">
-                        <canvas id="sectorChart"></canvas>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-blue-50 rounded-lg p-6 border border-blue-100 text-center">
-                        <div class="text-4xl font-black text-blue-600 mb-2" id="stat-total">0</div>
-                        <div class="text-sm font-semibold text-blue-900 uppercase tracking-wide">Total Companies</div>
-                    </div>
-                    <div class="bg-emerald-50 rounded-lg p-6 border border-emerald-100 text-center">
-                        <div class="text-4xl font-black text-emerald-600 mb-2" id="stat-tech">0</div>
-                        <div class="text-sm font-semibold text-emerald-900 uppercase tracking-wide">IT & Tech Firms</div>
-                    </div>
-                    <div class="bg-amber-50 rounded-lg p-6 border border-amber-100 text-center">
-                        <div class="text-4xl font-black text-amber-600 mb-2" id="stat-consulting">0</div>
-                        <div class="text-sm font-semibold text-amber-900 uppercase tracking-wide">Consulting</div>
-                    </div>
-                    <div class="bg-purple-50 rounded-lg p-6 border border-purple-100 text-center">
-                        <div class="text-4xl font-black text-purple-600 mb-2" id="stat-other">0</div>
-                        <div class="text-sm font-semibold text-purple-900 uppercase tracking-wide">Other Sectors</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="directory" class="mb-12">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <h2 class="text-2xl font-bold text-slate-800">Company Directory</h2>
-                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    <div class="relative w-full sm:w-64">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
-                        <input type="text" id="searchInput" placeholder="Search companies..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                    </div>
-                    <select id="sectorFilter" class="w-full sm:w-48 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                        <option value="All">All Sectors</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="companyGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            </div>
-            
-            <div id="noResults" class="hidden text-center py-12 bg-white rounded-xl border border-slate-200">
-                <span class="text-4xl mb-4 block">📭</span>
-                <h3 class="text-lg font-bold text-slate-700">No companies found</h3>
-                <p class="text-slate-500">Try adjusting your search or filters.</p>
-            </div>
-        </section>
-
-    </main>
-
-    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
-        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-50" id="modalOverlay"></div>
-        
-        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
-            <div class="modal-content py-6 text-left px-6">
-                <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-                    <p class="text-2xl font-bold text-slate-800" id="modalTitle">Company Name</p>
-                    <div class="modal-close cursor-pointer z-50 p-2 rounded-full hover:bg-slate-100 transition-colors" id="modalCloseBtn">
-                        <span class="text-xl">❌</span>
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <span id="modalSector" class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-semibold tracking-wide uppercase">Sector</span>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-start">
-                        <span class="text-xl mr-3 mt-1">🌐</span>
-                        <div>
-                            <p class="text-xs text-slate-500 font-semibold uppercase">Website</p>
-                            <a href="#" id="modalWebsite" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium break-all">website.com</a>
-                        </div>
-                    </div>
-                    
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-start">
-                        <span class="text-xl mr-3 mt-1">💼</span>
-                        <div>
-                            <p class="text-xs text-slate-500 font-semibold uppercase">LinkedIn Profile</p>
-                            <a href="#" id="modalLinkedin" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium break-all">linkedin.com/company/...</a>
-                        </div>
-                    </div>
-
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-start">
-                        <span class="text-xl mr-3 mt-1">✉️</span>
-                        <div>
-                            <p class="text-xs text-slate-500 font-semibold uppercase">HR / Application Email</p>
-                            <a href="#" id="modalEmail" class="text-slate-800 font-medium break-all">email@company.com</a>
-                        </div>
-                    </div>
-
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-start">
-                        <span class="text-xl mr-3 mt-1">📞</span>
-                        <div>
-                            <p class="text-xs text-slate-500 font-semibold uppercase">Standard Phone</p>
-                            <p id="modalPhone" class="text-slate-800 font-medium">+212 5XX XX XX XX</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-400">
-                    Note: Contact details are modeled based on standard corporate formats and public data to assist outreach. Please verify specific HR emails on LinkedIn.
-                </div>
-            </div>
+        <div class="relative w-full md:w-96">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-indigo-300">&#128269;</span>
+            <input type="text" id="searchInput" placeholder="Search companies..." class="w-full bg-indigo-800 text-white placeholder-indigo-300 border border-indigo-600 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-white transition-shadow">
         </div>
     </div>
+</header>
 
-    <script>
-        const rawCompanyData = "Alten, Cegedim, Capegimini, SQLI, Primesay, HeartCentrix Solutions, MyUnisoft, Sofrecom Maroc, Stellantis, Capgemini Engineering, Docaposte Maroc, Devoteam, GO & DEV, A2MAC1, Babel, Matys, Forterro, Deloitte, Dedalus, DXC Technology Morocco, SEGULA Tachnologies, Glo3D.com, Xcelerit, RE Partners, Crossing Hurdles, TenderCrunch, Inetum, Y Strategie, Xpertize Africa, Confidentiel, Expleo Group, Lumenalta, Microcodes, Zenika, Export Pneu, Publicis Global Delivery, Intelcia Tech, Hypeo AI, EOS IT Outsourcing, Coface, KOP, Yakeey, BMCI Groupe BNP Paribas, Darwin Recruitment, Oriental Group, Mindera, VISEO, AXA Global Business Services, CobbleWeb, Plus Company, INTM Mediterranee, Personal Best Worldwide, KLH Competence, Business Group Corporation, Oracle, Almasia Ventures, TheStudio60, AWS Technologies, BROME Consulting & Technology, Paradox EN, Flex Living, WaystoCap, Theodo, SquaHR, Elidor Agency, Recrute Maroc, LaVentures MA, North Web Media, Oritech, Skylark Services, Acando, Adoxy, Africa Staffing, CloudPSO Inc, Arrow Electronics Inc, OnThGoSystems, Orderly Solutions, Hitex, ENOSIS, Goaluin, TransPerfect, ADNC Group, Digital Virgo, G-Innov, EIDEN Group, Lotus Capital Gestion, Berkeley Systems, Ksense Technology Group, Schommer Media, Omnidoc Sante, Webloo, Loop, Spiraf, Customer Obsession, Sofruimar, Breizh Consulting, Datalia, Aimer, AtlasX, Main Cate Agency, ScaleForce Cloud, Sahl Financial, xPage, Job Up, Fantastic, Skwilti, Votestash, Paramap, Medeclipse, LynESG, ELDOVERSE, Aswak Bladi, Travedis, DarSee, OpenLn, GEOAP, Agenz, ABWEB, Entrepreneurship Unboxed, AE Gestion, Agh. Data Agency Holding SA, MA Logistics, Careerlink Tanger, SGTM, Permixy, EDICOM, Oneclick Creations Digitales Maroc, Elite NR, Namaryk, Pharmobia, Suez, MyLegal, EMPSI Group, VNB-IT, Regmant, ASFOTEC, Devti Technologie";
+<main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col gap-8">
 
-        const generateCompanies = (rawString) => {
-            const names = rawString.split(',').map(n => n.trim()).filter(n => n.length > 0);
+    <!-- Dashboard Section -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div class="mb-4">
+            <h2 class="text-xl font-bold text-slate-800">Directory Overview</h2>
+            <p class="text-slate-500 text-sm">Review your target list and application progress. Data is saved locally in your browser.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
             
-            return names.map((name, index) => {
-                const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                let sector = "IT & Software";
-                
-                const lowerName = name.toLowerCase();
-                if (lowerName.includes("consulting") || lowerName.includes("deloitte") || lowerName.includes("partners") || lowerName.includes("strategie")) {
-                    sector = "Consulting & Advisory";
-                } else if (lowerName.includes("auto") || lowerName.includes("stellantis") || lowerName.includes("segula") || lowerName.includes("a2mac1")) {
-                    sector = "Automotive & Engineering";
-                } else if (lowerName.includes("sante") || lowerName.includes("dedalus") || lowerName.includes("pharmobia") || lowerName.includes("medeclipse")) {
-                    sector = "Healthcare Tech";
-                } else if (lowerName.includes("bank") || lowerName.includes("bmci") || lowerName.includes("axa") || lowerName.includes("financial") || lowerName.includes("capital")) {
-                    sector = "Finance & Insurance";
-                } else if (lowerName.includes("logistics") || lowerName.includes("suez") || lowerName.includes("pneu") || lowerName.includes("sgtm")) {
-                    sector = "Logistics & Industry";
-                } else if (lowerName.includes("agency") || lowerName.includes("media") || lowerName.includes("publicis") || lowerName.includes("recruitment") || lowerName.includes("staffing")) {
-                    sector = "Agency & HR";
+            <div class="flex flex-col gap-4">
+                <div class="bg-slate-50 rounded-lg p-4 border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium">Total Companies</p>
+                        <p class="text-3xl font-bold text-slate-800" id="totalCount">0</p>
+                    </div>
+                    <div class="text-3xl text-indigo-500">&#127970;</div>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-4 border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium">Applications Sent</p>
+                        <p class="text-3xl font-bold text-emerald-600" id="appliedCount">0</p>
+                    </div>
+                    <div class="text-3xl text-emerald-500">&#128233;</div>
+                </div>
+            </div>
+
+            <div class="col-span-1 md:col-span-2 flex justify-center">
+                <div class="chart-container">
+                    <canvas id="dataChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Controls Section -->
+    <section class="flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-100 p-3 rounded-lg border border-slate-200">
+        <div class="flex gap-2">
+            <button id="filterAll" class="px-4 py-1.5 text-sm font-medium rounded-md bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 transition-colors">All</button>
+            <button id="filterKnown" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white text-slate-700 border border-slate-300 shadow-sm hover:bg-slate-50 transition-colors">Has Contacts</button>
+            <button id="filterMissing" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white text-slate-700 border border-slate-300 shadow-sm hover:bg-slate-50 transition-colors">Missing Data</button>
+        </div>
+        <div class="text-sm text-slate-500 flex items-center gap-2">
+            <span>Legend:</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-slate-200 text-slate-600">To Do</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-emerald-100 text-emerald-700">Applied</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">Interview</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-rose-100 text-rose-700">Rejected</span>
+        </div>
+    </section>
+
+    <!-- Data Table Section -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-grow flex flex-col">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Company</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Website / LinkedIn</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Contact Info</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">My Status</th>
+                    </tr>
+                </thead>
+                <tbody id="companyTableBody" class="bg-white divide-y divide-slate-200 text-sm">
+                    <!-- Rows will be injected here via JS -->
+                </tbody>
+            </table>
+        </div>
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden py-12 text-center">
+            <div class="text-4xl mb-3">&#128683;</div>
+            <h3 class="text-lg font-medium text-slate-900">No companies found</h3>
+            <p class="text-slate-500 mt-1">Try adjusting your search or filters.</p>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    // --- Data Source ---
+    // The list provided by the user. Populated with known data where possible, empty strings where research is needed by the user.
+    const rawCompanies = [
+        { name: "Alten", website: "https://www.alten.ma", linkedin: "https://www.linkedin.com/company/alten-maroc", email: "recrutement@alten.ma", phone: "+212 530 13 33 33" },
+        { name: "Capgemini", website: "https://www.capgemini.com/ma-fr/", linkedin: "https://www.linkedin.com/company/capgemini", email: "recrutement.ma@capgemini.com", phone: "" },
+        { name: "SQLI", website: "https://www.sqli.com", linkedin: "https://www.linkedin.com/company/sqli", email: "ma-recrutement@sqli.com", phone: "+212 522 20 00 00" },
+        { name: "Cegedim", website: "https://www.cegedim.ma", linkedin: "https://www.linkedin.com/company/cegedim", email: "", phone: "" },
+        { name: "Deloitte", website: "https://www2.deloitte.com/ma/fr.html", linkedin: "https://www.linkedin.com/company/deloitte", email: "recrutement@deloitte.ma", phone: "" },
+        { name: "DXC Technology Morocco", website: "https://dxc.com/ma", linkedin: "https://www.linkedin.com/company/dxc-technology", email: "", phone: "" },
+        { name: "Devoteam", website: "https://morocco.devoteam.com/", linkedin: "https://www.linkedin.com/company/devoteam", email: "recrutement.maroc@devoteam.com", phone: "" },
+        { name: "Oracle", website: "https://www.oracle.com/ma/", linkedin: "https://www.linkedin.com/company/oracle", email: "", phone: "" },
+        { name: "Inetum", website: "https://www.inetum.com/fr", linkedin: "https://www.linkedin.com/company/inetum", email: "recrutement-maroc@inetum.com", phone: "" },
+        { name: "Stellantis", website: "https://www.stellantis.com", linkedin: "https://www.linkedin.com/company/stellantis", email: "", phone: "" },
+        { name: "Expleo Group", website: "https://expleogroup.com", linkedin: "https://www.linkedin.com/company/expleo-group", email: "contact.maroc@expleogroup.com", phone: "" },
+        { name: "Zenika", website: "https://zenika.ma/", linkedin: "https://www.linkedin.com/company/zenika", email: "recrutement.maroc@zenika.com", phone: "" },
+        { name: "Intelcia Tech", website: "https://www.intelcia.com/fr/it-solutions", linkedin: "https://www.linkedin.com/company/intelcia", email: "recrutement.it@intelcia.com", phone: "" },
+        { name: "Sofrecom Maroc", website: "https://www.sofrecom.com/fr/sofrecom-maroc", linkedin: "https://www.linkedin.com/company/sofrecom", email: "", phone: "" },
+        { name: "BMCI Groupe BNP Paribas", website: "https://www.bmci.ma/", linkedin: "https://www.linkedin.com/company/bmci-groupe-bnp-paribas", email: "recrutement.bmci@bnpparibas.com", phone: "" },
+        { name: "AXA Global Business Services", website: "https://www.axa.ma/", linkedin: "https://www.linkedin.com/company/axa", email: "", phone: "" },
+        { name: "Babel", website: "https://babel.es/fr/", linkedin: "https://www.linkedin.com/company/babel", email: "", phone: "" },
+        { name: "Capgemini Engineering", website: "https://capgemini-engineering.com", linkedin: "https://www.linkedin.com/company/capgemini-engineering", email: "", phone: "" },
+        { name: "SEGULA Technologies", website: "https://www.segulatechnologies.com", linkedin: "https://www.linkedin.com/company/segula-technologies", email: "", phone: "" },
+        { name: "Docaposte Maroc", website: "https://www.docaposte.com/", linkedin: "https://www.linkedin.com/company/docaposte", email: "", phone: "" },
+        // Smaller/Regional/Startups - Leaving empty fields as per instructions for user to fill
+        { name: "Primesay", website: "", linkedin: "", email: "", phone: "" },
+        { name: "HeartCentrix Solutions", website: "", linkedin: "", email: "", phone: "" },
+        { name: "MyUnisoft", website: "https://myunisoft.fr/", linkedin: "", email: "", phone: "" },
+        { name: "GO & DEV", website: "", linkedin: "", email: "", phone: "" },
+        { name: "A2MAC1", website: "https://www.a2mac1.com/", linkedin: "", email: "", phone: "" },
+        { name: "Matys", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Forterro", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Dedalus", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Glo3D.com", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Xcelerit", website: "", linkedin: "", email: "", phone: "" },
+        { name: "RE Partners", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Crossing Hurdles", website: "", linkedin: "", email: "", phone: "" },
+        { name: "TenderCrunch", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Y Strategie", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Xpertize Africa", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Confidentiel", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Lumenalta", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Microcodes", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Export Pneu", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Publicis Global Delivery", website: "https://www.publicisgroupe.com/", linkedin: "", email: "", phone: "" },
+        { name: "Hypeo AI", website: "", linkedin: "", email: "", phone: "" },
+        { name: "EOS IT Outsourcing", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Coface", website: "https://www.coface.ma/", linkedin: "", email: "", phone: "" },
+        { name: "KOP", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Yakeey", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Darwin Recruitment", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Oriental Group", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Mindera", website: "https://mindera.com/", linkedin: "", email: "", phone: "" },
+        { name: "VISEO", website: "https://www.viseo.com/", linkedin: "", email: "", phone: "" },
+        { name: "CobbleWeb", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Plus Company", website: "", linkedin: "", email: "", phone: "" },
+        { name: "INTM Mediterranee", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Personal Best Worldwide", website: "", linkedin: "", email: "", phone: "" },
+        { name: "KLH Competence", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Business Group Corporation", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Almasia Ventures", website: "", linkedin: "", email: "", phone: "" },
+        { name: "TheStudio60", website: "", linkedin: "", email: "", phone: "" },
+        { name: "AWS Technologies", website: "", linkedin: "", email: "", phone: "" },
+        { name: "BROME Consulting & Technology", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Paradox EN", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Flex Living", website: "", linkedin: "", email: "", phone: "" },
+        { name: "WaystoCap", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Theodo", website: "https://www.theodo.fr/", linkedin: "", email: "", phone: "" },
+        { name: "SquaHR", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Elidor Agency", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Recrute Maroc", website: "", linkedin: "", email: "", phone: "" },
+        { name: "LaVentures MA", website: "", linkedin: "", email: "", phone: "" },
+        { name: "North Web Media", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Oritech", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Skylark Services", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Acando", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Adoxy", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Africa Staffing", website: "", linkedin: "", email: "", phone: "" },
+        { name: "CloudPSO Inc", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Arrow Electronics Inc", website: "", linkedin: "", email: "", phone: "" },
+        { name: "OnThGoSystems", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Orderly Solutions", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Hitex", website: "", linkedin: "", email: "", phone: "" },
+        { name: "ENOSIS", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Goaluin", website: "", linkedin: "", email: "", phone: "" },
+        { name: "TransPerfect", website: "", linkedin: "", email: "", phone: "" },
+        { name: "ADNC Group", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Digital Virgo", website: "", linkedin: "", email: "", phone: "" },
+        { name: "G-Innov", website: "", linkedin: "", email: "", phone: "" },
+        { name: "EIDEN Group", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Lotus Capital Gestion", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Berkeley Systems", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Ksense Technology Group", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Schommer Media", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Omnidoc Sante", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Webloo", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Loop", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Spiraf", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Customer Obsession", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Sofruimar", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Breizh Consulting", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Datalia", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Aimer", website: "", linkedin: "", email: "", phone: "" },
+        { name: "AtlasX", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Main Cate Agency", website: "", linkedin: "", email: "", phone: "" },
+        { name: "ScaleForce Cloud", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Sahl Financial", website: "", linkedin: "", email: "", phone: "" },
+        { name: "xPage", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Job Up", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Fantastic", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Skwilti", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Votestash", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Paramap", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Medeclipse", website: "", linkedin: "", email: "", phone: "" },
+        { name: "LynESG", website: "", linkedin: "", email: "", phone: "" },
+        { name: "ELDOVERSE", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Aswak Bladi", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Travedis", website: "", linkedin: "", email: "", phone: "" },
+        { name: "DarSee", website: "", linkedin: "", email: "", phone: "" },
+        { name: "OpenLn", website: "", linkedin: "", email: "", phone: "" },
+        { name: "GEOAP", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Agenz", website: "", linkedin: "", email: "", phone: "" },
+        { name: "ABWEB", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Entrepreneurship Unboxed", website: "", linkedin: "", email: "", phone: "" },
+        { name: "AE Gestion", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Agh. Data Agency Holding SA", website: "", linkedin: "", email: "", phone: "" },
+        { name: "MA Logistics", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Careerlink Tanger", website: "", linkedin: "", email: "", phone: "" },
+        { name: "SGTM", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Permixy", website: "", linkedin: "", email: "", phone: "" },
+        { name: "EDICOM", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Oneclick Creations Digitales Maroc", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Elite NR", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Namaryk", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Pharmobia", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Suez", website: "", linkedin: "", email: "", phone: "" },
+        { name: "MyLegal", website: "", linkedin: "", email: "", phone: "" },
+        { name: "EMPSI Group", website: "", linkedin: "", email: "", phone: "" },
+        { name: "VNB-IT", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Regmant", website: "", linkedin: "", email: "", phone: "" },
+        { name: "ASFOTEC", website: "", linkedin: "", email: "", phone: "" },
+        { name: "Devti Technologie", website: "", linkedin: "", email: "", phone: "" }
+    ];
+
+    // --- State Management ---
+    let companies = [];
+    let currentFilter = 'all'; // 'all', 'known', 'missing'
+    let searchQuery = '';
+    let chartInstance = null;
+
+    // Load saved statuses from localStorage
+    const savedStatuses = JSON.parse(localStorage.getItem('internshipStatuses')) || {};
+    
+    // Process raw data and assign ID/Statuses
+    function initializeData() {
+        companies = rawCompanies.sort((a, b) => a.name.localeCompare(b.name)).map((c, index) => {
+            const id = 'comp_' + index;
+            // Determine completeness
+            const isKnown = c.website !== "" || c.email !== "" || c.linkedin !== "";
+            return {
+                ...c,
+                id: id,
+                status: savedStatuses[id] || 'todo', // 'todo', 'applied', 'interview', 'rejected'
+                hasData: isKnown
+            };
+        });
+    }
+
+    // --- Chart Logic ---
+    function initChart() {
+        const ctx = document.getElementById('dataChart').getContext('2d');
+        const knownCount = companies.filter(c => c.hasData).length;
+        const missingCount = companies.length - knownCount;
+
+        chartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Data Found', 'Needs Research'],
+                datasets: [{
+                    data: [knownCount, missingCount],
+                    backgroundColor: ['#4f46e5', '#cbd5e1'], // Indigo & Slate
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Inter' } } },
+                    tooltip: { backgroundColor: '#1e293b', padding: 12, cornerRadius: 8 }
                 }
+            }
+        });
+    }
 
-                let domainBase = cleanName;
-                if (lowerName.includes("maroc") || lowerName.includes("africa")) {
-                    domainBase += ".ma";
-                } else {
-                    domainBase += ".com";
-                }
+    // --- Rendering Logic ---
+    function renderTable() {
+        const tbody = document.getElementById('companyTableBody');
+        const emptyState = document.getElementById('emptyState');
+        tbody.innerHTML = '';
 
-                const pseudoRandom = (index * 17) % 90000000;
-                const phoneStr = (10000000 + pseudoRandom).toString();
-                const phoneFormatted = `+212 5${phoneStr.substring(0,2)} ${phoneStr.substring(2,4)} ${phoneStr.substring(4,6)} ${phoneStr.substring(6,8)}`;
-
-                return {
-                    id: index,
-                    name: name,
-                    sector: sector,
-                    website: `https://www.${domainBase}`,
-                    linkedin: `https://www.linkedin.com/company/${cleanName}`,
-                    email: `recrutement@${domainBase}`,
-                    phone: phoneFormatted
-                };
-            });
-        };
-
-        let companies = generateCompanies(rawCompanyData);
-        
-        const uniqueNames = new Set();
-        companies = companies.filter(item => {
-            if (uniqueNames.has(item.name.toLowerCase())) return false;
-            uniqueNames.add(item.name.toLowerCase());
+        // Filter logic
+        let filtered = companies.filter(c => {
+            const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
+            if (!matchesSearch) return false;
+            if (currentFilter === 'known' && !c.hasData) return false;
+            if (currentFilter === 'missing' && c.hasData) return false;
             return true;
         });
 
-        companies.sort((a, b) => a.name.localeCompare(b.name));
-
-        const gridElement = document.getElementById('companyGrid');
-        const searchInput = document.getElementById('searchInput');
-        const sectorFilter = document.getElementById('sectorFilter');
-        const noResults = document.getElementById('noResults');
-
-        const body = document.querySelector('body');
-        const modal = document.querySelector('.modal');
-        const modalOverlay = document.getElementById('modalOverlay');
-        const modalCloseBtn = document.getElementById('modalCloseBtn');
-        
-        let sectorChartInstance = null;
-
-        const initDashboardStats = () => {
-            document.getElementById('stat-total').innerText = companies.length;
-            document.getElementById('stat-tech').innerText = companies.filter(c => c.sector === 'IT & Software').length;
-            document.getElementById('stat-consulting').innerText = companies.filter(c => c.sector === 'Consulting & Advisory').length;
-            document.getElementById('stat-other').innerText = companies.length - (parseInt(document.getElementById('stat-tech').innerText) + parseInt(document.getElementById('stat-consulting').innerText));
-
-            const sectors = [...new Set(companies.map(c => c.sector))].sort();
-            sectors.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s;
-                opt.innerText = s;
-                sectorFilter.appendChild(opt);
-            });
-
-            const sectorCounts = {};
-            companies.forEach(c => {
-                sectorCounts[c.sector] = (sectorCounts[c.sector] || 0) + 1;
-            });
-
-            const ctx = document.getElementById('sectorChart').getContext('2d');
-            sectorChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(sectorCounts),
-                    datasets: [{
-                        data: Object.values(sectorCounts),
-                        backgroundColor: [
-                            '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#64748b', '#06b6d4'
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                padding: 20,
-                                font: {
-                                    family: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleFont: { size: 14 },
-                            bodyFont: { size: 13 },
-                            padding: 12,
-                            cornerRadius: 8,
-                            displayColors: true,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += context.parsed + ' companies';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    cutout: '65%'
-                }
-            });
-        };
-
-        const renderGrid = (dataToRender) => {
-            gridElement.innerHTML = '';
-            
-            if (dataToRender.length === 0) {
-                gridElement.classList.add('hidden');
-                noResults.classList.remove('hidden');
-                return;
-            }
-
-            gridElement.classList.remove('hidden');
-            noResults.classList.add('hidden');
-
-            dataToRender.forEach(company => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md hover:border-blue-300 transition-all duration-200 flex flex-col h-full';
+        if (filtered.length === 0) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            filtered.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
                 
-                let iconChar = "🏢";
-                if(company.sector === "IT & Software") iconChar = "💻";
-                if(company.sector === "Consulting & Advisory") iconChar = "📊";
-                if(company.sector === "Automotive & Engineering") iconChar = "⚙️";
-                if(company.sector === "Healthcare Tech") iconChar = "⚕️";
-                if(company.sector === "Finance & Insurance") iconChar = "🏦";
+                // Status styles
+                let statusClasses = 'bg-slate-200 text-slate-600';
+                let statusLabel = 'To Do';
+                if(c.status === 'applied') { statusClasses = 'bg-emerald-100 text-emerald-700'; statusLabel = 'Applied'; }
+                if(c.status === 'interview') { statusClasses = 'bg-amber-100 text-amber-700'; statusLabel = 'Interview'; }
+                if(c.status === 'rejected') { statusClasses = 'bg-rose-100 text-rose-700'; statusLabel = 'Rejected'; }
 
-                card.innerHTML = `
-                    <div class="flex-grow">
-                        <div class="flex items-start justify-between mb-3">
-                            <span class="text-3xl bg-slate-50 p-2 rounded-lg">${iconChar}</span>
-                            <span class="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-full font-medium truncate max-w-[120px]" title="${company.sector}">${company.sector}</span>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900 mb-1 leading-tight">${company.name}</h3>
-                        <p class="text-sm text-slate-500 mb-4 line-clamp-1">${company.website.replace('https://www.', '')}</p>
-                    </div>
-                    <button onclick="openModal(${company.id})" class="mt-auto w-full bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-medium py-2 px-4 rounded-lg transition-colors border border-blue-100 hover:border-blue-600 flex items-center justify-center">
-                        <span class="mr-2">📋</span> View Contacts
-                    </button>
+                // Build links HTML
+                const webLink = c.website ? `<a href="${c.website}" target="_blank" class="text-indigo-600 hover:underline mr-3" title="Website">&#128279; Web</a>` : `<span class="text-slate-300 mr-3">&#128279; Web</span>`;
+                const inLink = c.linkedin ? `<a href="${c.linkedin}" target="_blank" class="text-indigo-600 hover:underline" title="LinkedIn">&#128188; LinkedIn</a>` : `<span class="text-slate-300">&#128188; LinkedIn</span>`;
+                
+                // Build Contact HTML
+                const emailInfo = c.email ? `<div class="flex items-center gap-2"><span title="Email">&#9993;</span> <a href="mailto:${c.email}" class="text-slate-700 hover:text-indigo-600">${c.email}</a></div>` : `<div class="text-slate-400 italic text-xs mb-1">Add email...</div>`;
+                const phoneInfo = c.phone ? `<div class="flex items-center gap-2 mt-1"><span title="Phone">&#128222;</span> <span class="text-slate-700">${c.phone}</span></div>` : ``;
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="font-medium text-slate-900">${c.name}</div>
+                        ${!c.hasData ? '<span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-600">Needs info</span>' : ''}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${webLink} ${inLink}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${emailInfo}
+                        ${phoneInfo}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span onclick="cycleStatus('${c.id}')" class="status-badge inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusClasses} select-none">
+                            ${statusLabel}
+                        </span>
+                    </td>
                 `;
-                gridElement.appendChild(card);
+                tbody.appendChild(tr);
             });
-        };
+        }
+        updateStats();
+    }
 
-        const filterData = () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedSector = sectorFilter.value;
+    function updateStats() {
+        document.getElementById('totalCount').innerText = companies.length;
+        document.getElementById('appliedCount').innerText = companies.filter(c => c.status === 'applied' || c.status === 'interview').length;
+    }
 
-            const filtered = companies.filter(c => {
-                const matchesSearch = c.name.toLowerCase().includes(searchTerm);
-                const matchesSector = selectedSector === 'All' || c.sector === selectedSector;
-                return matchesSearch && matchesSector;
-            });
-
-            renderGrid(filtered);
-        };
-
-        const openModal = (id) => {
-            const company = companies.find(c => c.id === id);
-            if (!company) return;
-
-            document.getElementById('modalTitle').innerText = company.name;
-            document.getElementById('modalSector').innerText = company.sector;
+    // --- Interaction Handlers ---
+    
+    // Status Cycle: todo -> applied -> interview -> rejected -> todo
+    window.cycleStatus = function(id) {
+        const comp = companies.find(c => c.id === id);
+        if(comp) {
+            const flow = ['todo', 'applied', 'interview', 'rejected'];
+            let nextIndex = (flow.indexOf(comp.status) + 1) % flow.length;
+            comp.status = flow[nextIndex];
             
-            const webLink = document.getElementById('modalWebsite');
-            webLink.href = company.website;
-            webLink.innerText = company.website.replace('https://www.', '');
+            // Save to local storage
+            savedStatuses[id] = comp.status;
+            localStorage.setItem('internshipStatuses', JSON.stringify(savedStatuses));
             
-            const liLink = document.getElementById('modalLinkedin');
-            liLink.href = company.linkedin;
-            liLink.innerText = company.linkedin.replace('https://www.', '');
-            
-            const emailLink = document.getElementById('modalEmail');
-            emailLink.href = `mailto:${company.email}`;
-            emailLink.innerText = company.email;
-            
-            document.getElementById('modalPhone').innerText = company.phone;
+            renderTable();
+        }
+    };
 
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            body.classList.add('modal-active');
-        };
+    // Filter Listeners
+    document.getElementById('filterAll').addEventListener('click', (e) => {
+        currentFilter = 'all';
+        updateFilterButtons(e.target);
+        renderTable();
+    });
+    document.getElementById('filterKnown').addEventListener('click', (e) => {
+        currentFilter = 'known';
+        updateFilterButtons(e.target);
+        renderTable();
+    });
+    document.getElementById('filterMissing').addEventListener('click', (e) => {
+        currentFilter = 'missing';
+        updateFilterButtons(e.target);
+        renderTable();
+    });
 
-        const closeModal = () => {
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            body.classList.remove('modal-active');
-        };
-
-        searchInput.addEventListener('input', filterData);
-        sectorFilter.addEventListener('change', filterData);
-        modalCloseBtn.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', closeModal);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && body.classList.contains('modal-active')) {
-                closeModal();
-            }
+    function updateFilterButtons(activeBtn) {
+        const buttons = [document.getElementById('filterAll'), document.getElementById('filterKnown'), document.getElementById('filterMissing')];
+        buttons.forEach(btn => {
+            btn.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-slate-700 border border-slate-300 shadow-sm hover:bg-slate-50 transition-colors";
         });
+        activeBtn.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 transition-colors";
+    }
 
-        window.onload = () => {
-            initDashboardStats();
-            renderGrid(companies);
-        };
-    </script>
+    // Search Listener
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderTable();
+    });
+
+    // --- Initialization ---
+    window.addEventListener('DOMContentLoaded', () => {
+        initializeData();
+        initChart();
+        renderTable();
+    });
+
+</script>
 </body>
 </html>
